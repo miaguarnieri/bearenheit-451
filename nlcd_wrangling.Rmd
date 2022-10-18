@@ -1,6 +1,6 @@
 ---
 title: "Land Cover Data Wrangling"
-author: "Mia Guarnieri"
+author: "Mia Guarnieri, Claire Meuter"
 date: '2022-10-18'
 output: html_document
 ---
@@ -205,7 +205,19 @@ mat <- matrix(m, ncol = 2, byrow = TRUE)
 
 #setting values for each numeric
 
-val <- c("open_water", "perrenial_ice_snow", "dev_open_space","dev_low_int", "dev_med_int", "dev_high_int", "barren_land", "forest", "shrub_scrub", "grassland_herbaceous", "planted_cultivated", "wetlands")
+val <- c(0, "undefied",
+         11, "open_water",
+         12, "perrenial_ice_snow", 
+         21, "dev_open_space",
+         22, "dev_low_int", 
+         23, "dev_med_int", 
+         24, "dev_high_int", 
+         31, "barren_land", 
+         40, "forest", 
+         52, "shrub_scrub", 
+         71, "grassland_herbaceous", 
+         80, "planted_cultivated", 
+         90, "wetlands")
 
 #apply reclassification function
 
