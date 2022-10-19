@@ -102,6 +102,10 @@ pop_den_2020_mask <- mask(pop_den_2020_calbers, ca_raster)
 
 pop_den_2021_mask <- mask(pop_den_2021_calbers, ca_raster)
 
+
 ```
 
+```{r}
+
+```
 
