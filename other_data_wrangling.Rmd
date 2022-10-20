@@ -58,7 +58,7 @@ Insert info about WIR data here
 
 ##Elevation (DEM, mean elevation)
 
-Two separate DEM rasters were available at 7.5-arc second resolution from USGS EROS. These will need to be merged togther.
+Two separate DEM rasters were available at 7.5-arc second resolution from USGS EROS. These will need to be merged together. Units of elevation are m.
 
 ```{r}
 
@@ -82,11 +82,28 @@ dem_calbers <- project(dem_ca, ca_raster)
 dem_clipped <- mask(dem_calbers, ca_raster)
 
 #plot DEM raster
-tm_shape(dem_ca) +
+tm_shape(dem_clipped) +
   tm_raster() +
   tmap_mode("view")
 
 ```
+
+```{r}
+#Save reclassified, reprojected, and clipped rasters to the data drive
+
+#DO NOT RUN THIS MORE THAN ONCE
+
+saverast <- function(x){
+  
+  name <- paste0(deparse(substitute(x)), ".tif") #the name of the file will be the same as the input object, plus '.tif' at the end
+  
+  #write the raster into the correct folder in drive (the path will need to be updated for other files) and save it as a geotiff
+  
+  writeRaster(x, filename = here(gdrive_data, "/IntermediateData/IntermediateData_Files/Elevation_Formatted", name), filetype = "GTiff")
+  
+}
+```
+
 
 ##Road density
 

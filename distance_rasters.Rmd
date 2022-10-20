@@ -152,8 +152,7 @@ reclassify <- function(x){
 
 #reclassify lc rasters to forest cover and then resample to correct resolution
 
-fc01 <- reclassify(lc01) %>% 
-  resample(y = ca_raster)
+fc01 <- reclassify(lc01)
 
 fc04 <- reclassify(lc04)
 
@@ -173,4 +172,17 @@ fc19 <- reclassify(lc19)
 
 fc_dist_01 <- distance(fc01)
 
+fc_dist_04 <- distance(fc04)
+
+fc_dist_06 <- distance(fc06)
+
+fc_dist_08 <- distance(fc08)
+
+fc_dist_11 <- distance(fc11)
+
+fc_dist_13 <- distance(fc13)
+
+fc_dist_16 <- distance(fc16)
+
+fc_dist_19 <- distance(fc19)
 ```
