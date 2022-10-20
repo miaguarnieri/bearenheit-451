@@ -74,6 +74,13 @@ dem_socal <- rast(here(gdrive_data, "/InputData/InputData_Files/2010_DEM_USGSERO
 
 dem_ca <- merge(dem_norcal, dem_socal)
 
+#reproject to the same crs (NAD 83, CA Albers (2011))
+dem_calbers <- project(dem_ca, ca_raster)
+
+#cropping the files to the spatial extent of CA
+
+dem_clipped <- mask(dem_calbers, ca_raster)
+
 #plot DEM raster
 tm_shape(dem_ca) +
   tm_raster() +
