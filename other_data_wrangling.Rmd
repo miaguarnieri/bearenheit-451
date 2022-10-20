@@ -102,6 +102,9 @@ saverast <- function(x){
   writeRaster(x, filename = here(gdrive_data, "/IntermediateData/IntermediateData_Files/Elevation_Formatted", name), filetype = "GTiff")
   
 }
+
+saverast(dem_clipped)
+
 ```
 
 
