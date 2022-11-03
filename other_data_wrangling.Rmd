@@ -28,7 +28,7 @@ gdrive_data <- "/Volumes/GoogleDrive/Shared drives/Black_Bear_Aware/gdrive_data"
 *Data Sources*: Please see ReadMe file for metadata and citations.
 *Reference Paper*: Insert hagani citation here
 
-#Load in necessary data layers
+#Load in existing data layers
 
 ##California raster
 
@@ -36,10 +36,7 @@ Insert info about CA raster layer here
 
 ```{r}
 
-ca_raster <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/CARaster_Tiger_Reclassed/CARaster_Tiger_Reclassed.img"))
-
-#check the coordinate reference system 
-crs(ca_raster)
+ca_raster <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/CARaster_Tiger_Formatted/formattedcaraster.tif"))
 
 #plot CA raster to confirm
 tm_shape(ca_raster) +
@@ -150,6 +147,125 @@ conflict_buffer_refined <- read_sf(here(gdrive_data, "/IntermediateData/Intermed
 #saving the file to intermediate data in the gdrive
 
  st_write(conflict_buffer_refined, dsn = here(gdrive_data, "/IntermediateData/IntermediateData_Files/conflict_formatted/conflict_buffered_refined", "conflict_buffered_refined.shp"))
+<<<<<<< HEAD
+=======
+
+```
+
+```{r}
+#creation of zero (non-conflict) points
+
+#generate random points within CA and buffer
+
+#make CA raster a shapefile
+
+ca_raster <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/CARaster_Tiger_Formatted/formattedcaraster.tif"))
+
+ca_pol <- as.polygons(ca_raster)
+
+ca_sf <- st_as_sf(ca_pol)
+
+sample_points <- st_sample(ca_sf, 4663) %>% 
+  st_as_sf()
+
+sample_buff <- st_buffer(sample_points, dist = 5000)
+
+#buffer sample points
+sample_points_buff <- st_buffer(sample_points_claire, dist = 5000)
+
+#load in conflict buffer
+
+con_buff <- read_sf(here(gdrive_data, "/IntermediateData/IntermediateData_Files/conflict_formatted/conflict_buffered_refined/conflict_buffered_refined.shp"))
+
+
+#select for the ones that are NOT intersecting
+
+ zeros <- ms_erase(sample_points,con_buff)
+
+```
+
+#claire's way of getting zeros
+```{r}
+#reading in CA raster 
+ca_raster <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/CARaster_Tiger_Formatted/formattedcaraster.tif"))
+#reading in conflict buffer shp file
+con_buff <- read_sf(here(gdrive_data, "/IntermediateData/IntermediateData_Files/conflict_formatted/conflict_buffered_refined/conflict_buffered_refined.shp"))
+
+#Making sure con_buf is in the same projection
+con_buff <- st_transform(con_buff,crs(ca_raster))
+
+#Doing an inverse mask- Anything withing the conflict buffer shapefiles will be a 0 value. So we get a california raster with all the conflict buffer locations zeroed out
+con_buff_inverse <- mask(ca_raster, con_buff, inverse = TRUE)
+
+# Mapping just to be sure it lookes right:
+tm_shape(con_buff_inverse) +
+  tm_raster() +
+  tmap_mode("view")
+
+#making con_buff_inverse a shapefile 
+ca_buff_pol <- as.polygons(con_buff_inverse)
+
+ca_buff_sf <- st_as_sf(ca_buff_pol)
+
+#mapping to make sure all looks okay 
+
+tm_shape(ca_buff_sf) +
+   tm_polygons()  +
+   tmap_mode("view")
+
+#sampling random points from this misshapen california shpfile
+sample_points_claire <- st_sample(ca_buff_sf, 4663)
+
+#mappping to see what it looks like 
+tm_shape(sample_points_claire) +
+  tm_dots() +
+  tmap_mode("view")
+
+#Buffering random points out. Because we're doing this, we will need to clip the geometry one more time later on if possible (?) bc these point buffered out might mess up where are conflict points are
+
+sample_points_buffered <- st_buffer(sample_points_claire, dist = 5000)
+
+#Testing to make sure the buffer worked
+ tm_shape(sample_points_buffered) +
+   tm_polygons() +
+  tm_shape(sample_points_claire) +
+   tm_dots(col  = "blue") +
+   tmap_mode("view")+ 
+   tm_shape(con_buff)+
+   tm_polygons(col  = "red")
+ 
+ 
+ #cropping sample_points_buffered by conflict_points_buffered
+ #This is where I can't get the code to run 
+ 
+ #conflict_points <- st_difference(sample_points_buffered,con_buff)
+ 
+ #so instead I'm going to try it with the function ms_erase package rmapshaper which might be faster 
+ 
+ zeros_claire <- ms_erase(sample_points_buffered,con_buff)
+ #map to see what it looks like 
+ 
+ tm_shape(zeros_claire) +
+   tm_polygons(col  = "green") +
+   tmap_mode("view")
+ 
+  tm_shape(con_buff) +
+  tm_polygons(alpha = 0.5) +
+tm_shape(zeros_claire) +
+   tm_polygons(col = "blue")+
+tmap_mode("view")
+ 
+ #mapping it, I can see that worked! We could probably go back to Mia's way of doing zeros now that we know this function runs faster. The nice thing about mine is we should have a lot of zeros still 
+ 
+ #Now we need to join conflict and non conflict points into one df
+#I think the first step will be to make a conflict column in the zeros_claire dataframe that has conflict = 0 
+ 
+zeros_df <- as(zeros_claire, "Spatial" )
+ 
+zeros_df1 <-as(zeros_df, "SpatialPolygonsDataFrame")
+
+zeros_df2 <- as(zeros_df1, "data.frame")
+>>>>>>> a48e750862457b454f5d517ca77d056fc8fccc64
 ```
 
 ##Elevation (DEM, mean elevation)
@@ -175,6 +291,7 @@ tm_shape(dem_ca) +
   tm_raster() +
   tmap_mode("view")
 
+<<<<<<< HEAD
 ```
 
 ##Road density
@@ -188,6 +305,8 @@ road_density_2014 <- rast(here(gdrive_data,"/InputData/InputData_Files/2014_UsaR
 
 ##Elevation
 ```{r}
+=======
+>>>>>>> a48e750862457b454f5d517ca77d056fc8fccc64
 #reproject to the same crs (NAD 83, CA Albers (2011)) and resolution (~230 m) as all other data
 dem_calbers <- project(dem_ca, ca_raster)
 
@@ -215,13 +334,21 @@ saverast(dem_formatted)
 ##Road density
 
 ```{r}
+#road_density_2014 <- rast(here(gdrive_data,"/InputData/InputData_Files/2014_UsaRoadDensity_ESRI/2014_UsaRoadDensity_ESRI.tif"))
 
-```
+#We're no longer using above road_density_2014 layer. Instead we'll read in the roads layer, reproject it, and export it to ArcGIS to use tool line density
 
+<<<<<<< HEAD
 #Create remaining data layers
+=======
+#reading in roads polyline: 
+roads_2015_tiger <- vect(here(gdrive_data,"/InputData/InputData_Files/2015_roads_TIGER/tl_2015_06_prisecroads.shp"))
+>>>>>>> a48e750862457b454f5d517ca77d056fc8fccc64
 
-```{r}
+#Reprojecting roads layer
+albers_roads_2015_tiger <- project(roads_2015_tiger, ca_raster)
 
+<<<<<<< HEAD
 ```
 
 ##Aspect
@@ -230,10 +357,18 @@ saverast(dem_formatted)
 #aspect
 # reading in elevation data 
 elev <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/Elevation_Formatted/dem_formatted.tif"))
+=======
+#Check coordinate system
+crs(albers_roads_2015_tiger)
+
+#export roads density - ONLY NEED TO DO ONCE, HAS BEEN DONE
+# writeVector(albers_roads_2015_tiger,filename = here(gdrive_data, "/IntermediateData/IntermediateData_Files/2015_roads_TIGER_Formatted/albers_roads_2015_tiger"))
+>>>>>>> a48e750862457b454f5d517ca77d056fc8fccc64
 
 aspect <- terrain(elev,v = "aspect",neighbors = 8)
 #I think this worked? 
 
+<<<<<<< HEAD
 #save the raster
 
 aspect_name <- paste0(deparse(substitute(aspect)), ".tif") #the name of the file will be the same as the input object, plus '.tif' at the end
@@ -248,6 +383,35 @@ writeRaster(aspect, filename = here(gdrive_data, "/IntermediateData/Intermediate
 # terrian ruggedness
 terrain_ruggedness <- terrain(elev,v = "TRI",neighbors = 8)
 
+=======
+#read in newly created road density. Road density was created in ArcGIS Pro from Roads 2015 Tiger layer. It was created by Claire on 10/23/2022 using the ArcGIS Pro tool line density 
+
+road_density <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/road_density_arc_2022_10_23/road_density.tif"))
+```
+
+
+## Creating aspect and terrian 
+```{r}
+#aspect
+# reading in elevation data 
+elev <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/Elevation_Formatted/dem_formatted.tif"))
+
+aspect <- terrain(elev,v = "aspect",neighbors = 8)
+#I think this worked? 
+
+#save the raster
+
+aspect_name <- paste0(deparse(substitute(aspect)), ".tif") #the name of the file will be the same as the input object, plus '.tif' at the end
+  
+#write the raster into the correct folder in drive (the path will need to be updated for other files) and save it as a geotiff
+
+writeRaster(aspect, filename = here(gdrive_data, "/IntermediateData/IntermediateData_Files/aspect", aspect_name), filetype = "GTiff", overwrite = TRUE)
+
+
+# terrian ruggedness
+terrain_ruggedness <- terrain(elev,v = "TRI",neighbors = 8)
+
+>>>>>>> a48e750862457b454f5d517ca77d056fc8fccc64
 #save the raster
 
 tr_name <- paste0(deparse(substitute(terrain_ruggedness)), ".tif") #the name of the file will be the same as the input object, plus '.tif' at the end
@@ -256,4 +420,3 @@ tr_name <- paste0(deparse(substitute(terrain_ruggedness)), ".tif") #the name of 
 
 writeRaster(terrain_ruggedness, filename = here(gdrive_data, "/IntermediateData/IntermediateData_Files/terrain_ruggedness", tr_name), filetype = "GTiff", overwrite = TRUE)
 ```
-
