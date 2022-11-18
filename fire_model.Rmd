@@ -877,7 +877,6 @@ load(here("models", "fire_model_allyears.rds"))
 ```
 
 
-
 ```{r}
 #test dredge to see if the function works
 smallmod <- rspf(conflict ~ TRI + popdens, family = "binomial", m = 0, B = 1000, data = climate_model_data)
