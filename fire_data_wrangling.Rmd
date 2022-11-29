@@ -18,9 +18,9 @@ library(tmap)
 library(beepr)
 library(rgeos)
 library(rmapshaper)
-#library(rgdal) fyi rgdal has project function as well and will mess up terra project function
+#library(rgdal)  rgdal has project function as well and will mess up terra project function
 
-#mia and claire's file path
+#ile path
 gdrive_data <- "/Volumes/GoogleDrive/Shared drives/Black_Bear_Aware/gdrive_data"
 
 

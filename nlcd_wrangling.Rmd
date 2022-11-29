@@ -303,3 +303,13 @@ saverast(lc19_reclassed)
 # saverast(lc11_reclassed)
 
 ```
+
+
+```{r}
+#read in and test
+
+lc16 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/land_cover/lc16_reclassed.tif"))
+
+plot(lc16)
+
+```
