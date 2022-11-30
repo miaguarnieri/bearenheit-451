@@ -214,3 +214,29 @@ plot(map, main="Model Predictions")
 #writeRaster(map, filename = here(gdrive_data, "/AnalysisData/model_outputs/firemod_map.tif"), filetype = "GTiff", overwrite= TRUE)
 
 ```
+
+#Keep only high probability
+
+```{r}
+#read in the map raster
+
+firemod_map_top <- rast(here(gdrive_data, "/AnalysisData/model_outputs/firemod_map.tif"))
+
+firemod_map_top[firemod_map_top < 0.60] <- NA
+
+firemod_map_top[firemod_map_top >= 0.60] <- firemod_map_top
+
+
+#read in the caraster
+carast <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/CARaster_Tiger_Formatted/formattedcaraster.tif"))
+
+plot(carast, col = "gray55")
+plot(firemod_map_top, add = TRUE)
+
+
+tm_shape(firemod_map_top) +
+  tm_raster() +
+  tmap_mode("view")
+```
+
+
