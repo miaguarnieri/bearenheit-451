@@ -14,7 +14,7 @@ library(tmap)
 library(here)
 library(sf)
 library(ResourceSelection)
-
+library(tidyterra)
 
 
 #file path
@@ -210,4 +210,7 @@ names(f_lc) <- "lc"
 map <- terra::predict(object = stackca_clim_rast, model = fire_model_allyears, fun = predict, factors = f_lc, na.rm = TRUE, type = "response")
 
 plot(map, main="Model Predictions")
+
+#writeRaster(map, filename = here(gdrive_data, "/AnalysisData/model_outputs/firemod_map.tif"), filetype = "GTiff", overwrite= TRUE)
+
 ```
