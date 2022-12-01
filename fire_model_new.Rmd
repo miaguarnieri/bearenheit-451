@@ -896,7 +896,7 @@ save(mod3fire, file = here("models", "mod3fire.rds"))
 load(here("models", "mod3fire.rds"))
 
 #test aic
-AIC(mod3fire)
+AIC(fire_model_allyears)
 ```
 
 
@@ -910,6 +910,6 @@ dredged_model <- dredge(global.model = smallmod, rank = "AIC")
 
 model.sel(dredged_model)
 
-
+AIC(fire_model_allyears)
 ```
 
