@@ -896,7 +896,7 @@ save(mod3fire, file = here("models", "mod3fire.rds"))
 load(here("models", "mod3fire.rds"))
 
 #test aic
-AIC(fire_model_allyears)
+AIC(mod3fire)
 ```
 
 
