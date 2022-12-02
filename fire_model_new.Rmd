@@ -910,6 +910,6 @@ dredged_model <- dredge(global.model = smallmod, rank = "AIC")
 
 model.sel(dredged_model)
 
-
+AIC(fire_model_allyears)
 ```
 
