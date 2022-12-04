@@ -15,12 +15,37 @@ library(here)
 library(sf)
 library(ResourceSelection)
 library(tidyterra)
-
+library(ggplot2)
+#library(calecopal)
 
 #file path
 gdrive_data <- "/Volumes/GoogleDrive/Shared drives/Black_Bear_Aware/gdrive_data"
 
 ```
+
+#Conflict data
+
+```{r}
+conflict_points <- read_sf(here(gdrive_data, "/IntermediateData/IntermediateData_Files/conflict_formatted/conflict_points/conflict_points.shp")) %>% 
+  separate(incdnt_d, into = c("inc_date", "inc_time"), sep = " ") %>% 
+  separate(inc_date, into = c("month", "day", "year"), sep = "/") %>% 
+  mutate(year = as.character.Date(year),
+         "type" = cnfrmd_,
+         "county" = cnty_nm,
+         "conflict" = 1) %>% 
+  filter(year != "2022")
+
+ggplot(conflict_points) +
+  geom_bar(aes(x = year, fill = cnfrmd_)) +
+  scale_fill_manual(values = c("#B4AA98", "#516238", "#4CA2B0", "#395B5F")) +
+  labs(title = "Conflict Type By Year",
+       x = "Count",
+       y = "Year",
+       fill = "Conflict Type")
+#bigsur = c("#E4DECE", "#ECBD95", "#9BB1BB", "#79ACBD", "#346575", "#0B4221")
+#sierra2 = c("#FDD989", "#8BAD57", "#516238", "#4CA2B0", "#5A8B92", "#395B5F")
+```
+
 
 #Base Model - not up to date
 
@@ -115,9 +140,11 @@ plot(map, main="Base Model Predictions")
 
 #read in model, then layers and stack them 
 ```{r}
-#read in the model
+#read in the models
 
 model<- load(here("models", "fire_model_allyears.rds")) #you have to name the object "model or it will not read in right
+
+model <- load(here("models", "mod3fire.rds"))
 
 # dem + aspect + TRI + popdens + lc + road_dens + road_dist + 
    # streams_dist + urban_dist + rec_dist + forest_dist + forest_dens + 
@@ -181,7 +208,7 @@ dist_fire_45yrs <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Fi
 
 stackca_clim_rast <- c(dem, aspect, TRI, popdens, lc, road_dens, road_dist, streams_dist, urban_dist, rec_dist, forest_dist, forest_dens, dist_fire_1yr, dist_fire_23yrs, dist_fire_45yrs)
 
-climate_model_data <- read_csv(here(gdrive_data, "/AnalysisData/model_df_climate/11_10_2022/climate_model_data_allyears.csv"))
+fire_model_data <- read_csv(here(gdrive_data, "/AnalysisData/model_df_climate/12_3_2022/fire_model_data_allyears.csv"))
 
 ```
 
@@ -195,7 +222,7 @@ names(stackca_clim_rast) <- c("dem", "aspect", "TRI", "popdens", "lc", "road_den
 #any categorical variables used need to be identified first
 
 #making land cover categories factors
-lc_factors <- as.factor(climate_model_data$lc)
+lc_factors <- as.factor(fire_model_data$lc)
 
 #turning that into a list
 f <- as.list(levels(lc_factors))
@@ -207,10 +234,36 @@ names(f) <- "lc"
 
 names(f_lc) <- "lc"
 
-map <- terra::predict(object = stackca_clim_rast, model = fire_model_allyears, fun = predict, factors = f_lc, na.rm = TRUE, type = "response")
+map <- terra::predict(object = stackca_clim_rast, model = mod3fire, fun = predict, factors = f_lc, na.rm = TRUE, type = "response")
 
 plot(map, main="Model Predictions")
 
-#writeRaster(map, filename = here(gdrive_data, "/AnalysisData/model_outputs/firemod_map.tif"), filetype = "GTiff", overwrite= TRUE)
+writeRaster(map, filename = here(gdrive_data, "/AnalysisData/model_outputs/mod3fire_map.tif"), filetype = "GTiff", overwrite= TRUE)
 
 ```
+
+#Keep only high probability
+
+```{r}
+#read in the map raster
+
+firemod_map_top <- rast(here(gdrive_data, "/AnalysisData/model_outputs/firemod_map.tif"))
+
+firemod_map_top[firemod_map_top < 0.60] <- NA
+
+firemod_map_top[firemod_map_top >= 0.60] <- firemod_map_top
+
+
+#read in the caraster
+carast <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/CARaster_Tiger_Formatted/formattedcaraster.tif"))
+
+plot(carast, col = "gray55")
+plot(firemod_map_top, add = TRUE)
+
+
+tm_shape(firemod_map_top) +
+  tm_raster() +
+  tmap_mode("view")
+```
+
+
