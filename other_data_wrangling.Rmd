@@ -147,8 +147,6 @@ conflict_buffer_refined <- read_sf(here(gdrive_data, "/IntermediateData/Intermed
 #saving the file to intermediate data in the gdrive
 
  st_write(conflict_buffer_refined, dsn = here(gdrive_data, "/IntermediateData/IntermediateData_Files/conflict_formatted/conflict_buffered_refined", "conflict_buffered_refined.shp"))
-<<<<<<< HEAD
-=======
 
 ```
 
@@ -265,7 +263,6 @@ zeros_df <- as(zeros_claire, "Spatial" )
 zeros_df1 <-as(zeros_df, "SpatialPolygonsDataFrame")
 
 zeros_df2 <- as(zeros_df1, "data.frame")
->>>>>>> a48e750862457b454f5d517ca77d056fc8fccc64
 ```
 
 ##Elevation (DEM, mean elevation)
@@ -291,7 +288,6 @@ tm_shape(dem_ca) +
   tm_raster() +
   tmap_mode("view")
 
-<<<<<<< HEAD
 ```
 
 ##Road density
@@ -305,8 +301,7 @@ road_density_2014 <- rast(here(gdrive_data,"/InputData/InputData_Files/2014_UsaR
 
 ##Elevation
 ```{r}
-=======
->>>>>>> a48e750862457b454f5d517ca77d056fc8fccc64
+
 #reproject to the same crs (NAD 83, CA Albers (2011)) and resolution (~230 m) as all other data
 dem_calbers <- project(dem_ca, ca_raster)
 
@@ -338,17 +333,15 @@ saverast(dem_formatted)
 
 #We're no longer using above road_density_2014 layer. Instead we'll read in the roads layer, reproject it, and export it to ArcGIS to use tool line density
 
-<<<<<<< HEAD
+
 #Create remaining data layers
-=======
+
 #reading in roads polyline: 
 roads_2015_tiger <- vect(here(gdrive_data,"/InputData/InputData_Files/2015_roads_TIGER/tl_2015_06_prisecroads.shp"))
->>>>>>> a48e750862457b454f5d517ca77d056fc8fccc64
+
 
 #Reprojecting roads layer
 albers_roads_2015_tiger <- project(roads_2015_tiger, ca_raster)
-
-<<<<<<< HEAD
 ```
 
 ##Aspect
@@ -357,18 +350,18 @@ albers_roads_2015_tiger <- project(roads_2015_tiger, ca_raster)
 #aspect
 # reading in elevation data 
 elev <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/Elevation_Formatted/dem_formatted.tif"))
-=======
+
 #Check coordinate system
 crs(albers_roads_2015_tiger)
 
 #export roads density - ONLY NEED TO DO ONCE, HAS BEEN DONE
 # writeVector(albers_roads_2015_tiger,filename = here(gdrive_data, "/IntermediateData/IntermediateData_Files/2015_roads_TIGER_Formatted/albers_roads_2015_tiger"))
->>>>>>> a48e750862457b454f5d517ca77d056fc8fccc64
+
 
 aspect <- terrain(elev,v = "aspect",neighbors = 8)
 #I think this worked? 
 
-<<<<<<< HEAD
+
 #save the raster
 
 aspect_name <- paste0(deparse(substitute(aspect)), ".tif") #the name of the file will be the same as the input object, plus '.tif' at the end
@@ -383,7 +376,7 @@ writeRaster(aspect, filename = here(gdrive_data, "/IntermediateData/Intermediate
 # terrian ruggedness
 terrain_ruggedness <- terrain(elev,v = "TRI",neighbors = 8)
 
-=======
+
 #read in newly created road density. Road density was created in ArcGIS Pro from Roads 2015 Tiger layer. It was created by Claire on 10/23/2022 using the ArcGIS Pro tool line density 
 
 road_density <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/road_density_arc_2022_10_23/road_density.tif"))
@@ -411,7 +404,6 @@ writeRaster(aspect, filename = here(gdrive_data, "/IntermediateData/Intermediate
 # terrian ruggedness
 terrain_ruggedness <- terrain(elev,v = "TRI",neighbors = 8)
 
->>>>>>> a48e750862457b454f5d517ca77d056fc8fccc64
 #save the raster
 
 tr_name <- paste0(deparse(substitute(terrain_ruggedness)), ".tif") #the name of the file will be the same as the input object, plus '.tif' at the end

@@ -251,7 +251,7 @@ fire_modeldf_16_year <- fire_model_df_16 %>%
 ```{r}
 #saving the files
 
-write.csv(fire_modeldf_16_year, file = here(gdrive_data, "/AnalysisData/model_df_climate/11_28_2022/fire_modeldf_16.csv"), row.names = FALSE)
+write.csv(fire_modeldf_16_year, file = here(gdrive_data, "/AnalysisData/model_df_climate/12_3_2022/fire_modeldf_16.csv"), row.names = FALSE)
 
 ```
 
@@ -358,7 +358,7 @@ fire_modeldf_17_year <- fire_model_df_17 %>%
 ```{r}
 #saving the files
 
-write.csv(fire_modeldf_17_year, file = here(gdrive_data, "/AnalysisData/model_df_climate/11_28_2022/fire_modeldf_17.csv"), row.names = FALSE)
+write.csv(fire_modeldf_17_year, file = here(gdrive_data, "/AnalysisData/model_df_climate/12_3_2022/fire_modeldf_17.csv"), row.names = FALSE)
 
 ```
 
@@ -473,7 +473,7 @@ fire_modeldf_18_year <- fire_model_df_18 %>%
 ```{r}
 #save the file
 
-write.csv(fire_modeldf_18_year, file = here(gdrive_data, "/AnalysisData/model_df_climate/11_28_2022/fire_modeldf_18.csv"), row.names = FALSE)
+write.csv(fire_modeldf_18_year, file = here(gdrive_data, "/AnalysisData/model_df_climate/12_3_2022/fire_modeldf_18.csv"), row.names = FALSE)
 ```
 
 ##2019
@@ -584,7 +584,7 @@ fire_modeldf_19_year <- fire_model_df_19 %>%
 ```{r}
 #save the file
 
-write.csv(fire_modeldf_19_year, file = here(gdrive_data, "/AnalysisData/model_df_climate/11_28_2022/fire_modeldf_19.csv"), row.names = FALSE)
+write.csv(fire_modeldf_19_year, file = here(gdrive_data, "/AnalysisData/model_df_climate/12_3_2022/fire_modeldf_19.csv"), row.names = FALSE)
 
 ```
 
@@ -700,7 +700,7 @@ fire_modeldf_20_year <- fire_model_df_20 %>%
 ```{r}
 #save the file
 
-write.csv(fire_modeldf_20_year, file = here(gdrive_data, "/AnalysisData/model_df_climate/11_28_2022/fire_modeldf_20.csv"), row.names = FALSE)
+write.csv(fire_modeldf_20_year, file = here(gdrive_data, "/AnalysisData/model_df_climate/12_3_2022/fire_modeldf_20.csv"), row.names = FALSE)
 
 ```
 
@@ -813,7 +813,7 @@ fire_modeldf_21_year <- fire_model_df_21 %>%
 ```{r}
 #save the file
 
-write.csv(fire_modeldf_21_year, file = here(gdrive_data, "/AnalysisData/model_df_climate/11_28_2022/fire_modeldf_21.csv"), row.names = FALSE)
+write.csv(fire_modeldf_21_year, file = here(gdrive_data, "/AnalysisData/model_df_climate/12_3_2022/fire_modeldf_21.csv"), row.names = FALSE)
 
 ```
 
@@ -824,17 +824,17 @@ write.csv(fire_modeldf_21_year, file = here(gdrive_data, "/AnalysisData/model_df
 ```{r}
 #read them in
 
-climdf16 <- read_csv(here(gdrive_data, "/AnalysisData/model_df_climate/11_28_2022/fire_modeldf_16.csv"))
+climdf16 <- read_csv(here(gdrive_data, "/AnalysisData/model_df_climate/12_3_2022/fire_modeldf_16.csv"))
 
-climdf17 <- read_csv(here(gdrive_data, "/AnalysisData/model_df_climate/11_28_2022/fire_modeldf_17.csv"))
+climdf17 <- read_csv(here(gdrive_data, "/AnalysisData/model_df_climate/12_3_2022/fire_modeldf_17.csv"))
 
-climdf18 <- read_csv(here(gdrive_data, "/AnalysisData/model_df_climate/11_28_2022/fire_modeldf_18.csv"))
+climdf18 <- read_csv(here(gdrive_data, "/AnalysisData/model_df_climate/12_3_2022/fire_modeldf_18.csv"))
 
-climdf19 <- read_csv(here(gdrive_data, "/AnalysisData/model_df_climate/11_28_2022/fire_modeldf_19.csv"))
+climdf19 <- read_csv(here(gdrive_data, "/AnalysisData/model_df_climate/12_3_2022/fire_modeldf_19.csv"))
 
-climdf20 <- read_csv(here(gdrive_data, "/AnalysisData/model_df_climate/11_28_2022/fire_modeldf_20.csv"))
+climdf20 <- read_csv(here(gdrive_data, "/AnalysisData/model_df_climate/12_3_2022/fire_modeldf_20.csv"))
 
-climdf21 <- read_csv(here(gdrive_data, "/AnalysisData/model_df_climate/11_28_2022/fire_modeldf_21.csv"))
+climdf21 <- read_csv(here(gdrive_data, "/AnalysisData/model_df_climate/12_3_2022/fire_modeldf_21.csv"))
 
 fire_model_data_allyears <- rbind(climdf16, climdf17, climdf18, climdf19, climdf20, climdf21)
 
@@ -847,7 +847,7 @@ unique(fire_model_data_allyears$year)
 ```{r}
 #save the all year data frame
 
-write.csv(fire_model_data_allyears, file = here(gdrive_data, "/AnalysisData/model_df_climate/11_28_2022/fire_model_data_allyears.csv"), row.names = FALSE)
+write.csv(fire_model_data_allyears, file = here(gdrive_data, "/AnalysisData/model_df_climate/12_3_2022/fire_model_data_allyears.csv"), row.names = FALSE)
 ```
 
 
@@ -855,7 +855,7 @@ write.csv(fire_model_data_allyears, file = here(gdrive_data, "/AnalysisData/mode
 
 ```{r}
 #read in the data
-fire_model_data <- read_csv(here(gdrive_data, "/AnalysisData/model_df_climate/11_28_2022/fire_model_data_allyears.csv"))
+fire_model_data <- read_csv(here(gdrive_data, "/AnalysisData/model_df_climate/12_3_2022/fire_model_data_allyears.csv"))
 ```
 
 ```{r}
@@ -865,31 +865,30 @@ fire_model_allyears <- rspf(conflict ~ dem + aspect + TRI + popdens + lc + road_
 
 #update 11/17/22: mod #3 is best option so rerunning with climate variables 
 
-mod3fire <- rspf(conflict ~ dem + lc + forest_dist + popdens + rec_dist + streams_dist + TRI + urban_dist + dist_fire_1yr + dist_fire_23yrs + dist_fire_45yrs, family = "binomial", m = 0, B = 1000, data = fire_model_data)
+mod3fire <- rspf(conflict ~ dem + lc + forest_dist + popdens + rec_dist + streams_dist + 
+    TRI + urban_dist + dist_fire_1yr + dist_fire_23yrs + dist_fire_45yrs, family = "binomial", m = 0, B = 1000, data = fire_model_data)
 
 #update 11/22/22: running without land cover to see if that will run with predict functions
 
-clim_mod_no_lc <- rspf(conflict ~ dem + aspect + TRI + popdens + road_dens + road_dist + streams_dist + urban_dist + rec_dist + forest_dist + forest_dens + dist_fire_1yr + dist_fire_23yrs + dist_fire_45yrs, family = "binomial", m = 0, B = 1000, data = fire_model_data)
+# clim_mod_no_lc <- rspf(conflict ~ dem + aspect + TRI + popdens + road_dens + road_dist + streams_dist + urban_dist + rec_dist + forest_dist + forest_dens + dist_fire_1yr + dist_fire_23yrs + dist_fire_45yrs, family = "binomial", m = 0, B = 1000, data = fire_model_data)
 
 ```
 
-
 ```{r}
-#save the model
+#save the all covariate model
 
 save(fire_model_allyears, file = here("models", "fire_model_allyears.rds"))
 
 #save model with no lc
 
-save(clim_mod_no_lc, file = here("models", "clim_mod_no_lc.rds"))
+#save(clim_mod_no_lc, file = here("models", "clim_mod_no_lc.rds"))
 
 #test load it in
 
 load(here("models", "fire_model_allyears.rds"))
 
-```
+#save the mod 3 with climate
 
-```{r}
 save(mod3fire, file = here("models", "mod3fire.rds"))
 
 #load it in 
@@ -897,18 +896,6 @@ load(here("models", "mod3fire.rds"))
 
 #test aic
 AIC(mod3fire)
+AIC(fire_model_allyears)
 ```
 
-
-```{r}
-#test dredge to see if the function works
-smallmod <- rspf(conflict ~ TRI + popdens, family = "binomial", m = 0, B = 1000, data = fire_model_data)
-
-library(MuMIn)
-
-dredged_model <- dredge(global.model = smallmod, rank = "AIC")
-
-model.sel(dredged_model)
-
-
-```
