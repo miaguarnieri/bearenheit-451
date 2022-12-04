@@ -20,14 +20,15 @@ library(lubridate)
 library(ResourceSelection)
 library(rmapshaper)
 
-#mia and claire's file path
+#mia, chase, and claire's file path
 gdrive_data <- "/Volumes/GoogleDrive/Shared drives/Black_Bear_Aware/gdrive_data"
+
+#sam's file path
+#gdrive_data <- "G:/Shared drives/Black_Bear_Aware/gdrive_data"
 
 ```
 
 #Load in data layers
-
-##Conflict data
 
 ```{r}
 #conflict data
@@ -141,6 +142,7 @@ conpoints16_reproj <- project(conpoints_16_sv,crs(ca_raster))
 
 conbuff16_reproj <- project(conbuff_16_sv,crs(ca_raster))
 
+#convert back to sf for creation of inverse mask
 conpoints16_sf <- st_as_sf(conpoints16_reproj)
 
 conbuff16_sf <- st_as_sf(conbuff16_reproj)
@@ -159,7 +161,8 @@ cabuff16_inv_pol <- as.polygons(conbuff16_inverse)
 cabuff16_inv_sf <- st_as_sf(cabuff16_inv_pol)
 
 #sampling random points from this misshapen california shpfile
-sample16 <- st_sample(cabuff16_inv_sf, 427) %>% 
+#we sample 5X the amount of zeros for how many conflict points we have 
+sample16 <- st_sample(cabuff16_inv_sf, 2135) %>% 
   st_as_sf()
 
 #mappping to see what it looks like 
@@ -216,25 +219,28 @@ stack16 <- c(dem, aspect, ter_rug, pop16, lc16, road_dens, road_dist, streams_di
 #nonconflict points
 
 zero_vars16 <- extract(stack16, zeros16_formatted, method = "simple", bind = TRUE, ID = TRUE) %>%
-  as.data.frame() %>% 
-  mutate(ID = 0)
+  as.data.frame()
+
 
 #union conflict points before extracting
-con_union16 <- con_16 %>% 
-  st_union() %>% 
-  vect()
+#con_union16 <- con_16 %>% 
+ # st_union() %>% 
+ # vect()
 
-con_vars16 <- extract(stack16, con_union16, method = "simple", bind = TRUE, ID = TRUE)
+con_vars16 <- extract(stack16, con_16, method = "simple", bind = TRUE, ID = TRUE) %>%
+  as.data.frame()
 
 #combine conflict and non-conflict
 
-model_df_16 <- rbind(zero_vars16, con_vars16)
+colnames(zero_vars16) <- c("ID", "dem", "aspect", "TRI", "popdens", "lc", "road_dens", "road_dist", "streams_dist", "urban_dist", "rec_dist", "forest_dist", "forest_dens")
 
-colnames(model_df_16) <- c("ID", "dem", "aspect", "TRI", "popdens1", "popdens2", "popdens3", "popdens4", "lc", "road_dens", "road_dist", "streams_dist", "urban_dist", "rec_dist", "forest_dist", "forest_dens")
+colnames(con_vars16) <- c("ID", "dem", "aspect", "TRI", "popdens", "lc", "road_dens", "road_dist", "streams_dist", "urban_dist", "rec_dist", "forest_dist", "forest_dens")
+
+model_df_16 <- rbind(zero_vars16, con_vars16)
 
 #run it in the model
 
-model16 <- rspf(ID ~ dem + aspect + TRI + popdens1 + popdens2 + popdens3 + popdens4 + lc + road_dens + road_dist + streams_dist + urban_dist + rec_dist + forest_dist + forest_dens, family = "binomial", m = 0, B = 1000, data = model_df_16)
+#model16 <- rspf(ID ~ dem + aspect + TRI + popdens1 + popdens2 + popdens3 + popdens4 + lc + road_dens + road_dist + streams_dist + urban_dist + rec_dist + forest_dist + forest_dens, family = "binomial", m = 0, B = 1000, data = model_df_16)
 
 #label the year for later binding with other dfs
 modeldf_16_year <- model_df_16 %>% 
@@ -245,32 +251,12 @@ modeldf_16_year <- model_df_16 %>%
 ```{r}
 #saving the files
 
-#save the csv with extracted variables
-save(modeldf_16_year, file = here(gdrive_data, "/AnalysisData/model_df_noclimate/10_31_2022/modeldf_16.csv"))
-
-
-#EDIT: that save didn't work, trying this workaround
-
-write.csv(modeldf_16_year, file = here(gdrive_data, "/AnalysisData/model_df_noclimate/11_1_2022/modeldf_16.csv"), row.names = FALSE)
+write.csv(modeldf_16_year, file = here(gdrive_data, "/AnalysisData/model_df_noclimate/12_2_2022/modeldf_16.csv"), row.names = FALSE)
 
 #save the 2016 model output
-save(model16, file = here(gdrive_data, "/AnalysisData/models/10_31_2022/model_2016_noclimate/model_2016_noclimate.RData"))
+#save(model16, file = here(gdrive_data, "/AnalysisData/models/10_31_2022/model_2016_noclimate/model_2016_noclimate.RData"))
 ```
 
-
-#Sam is playing around with the code here:
-```{r}
-#try to stack rasters
-
-raster_stack_test <- c(roads15_ca_distance,stream17_ca_distance)
-
-tm_shape(raster_stack_test) +
-  tm_raster() +
-  tmap_mode("view")
-
-raster_test_df <- as.data.frame(raster_stack_test)
-
-```
 
 ##2017
 
@@ -318,7 +304,7 @@ cabuff17_inv_pol <- as.polygons(conbuff17_inverse)
 cabuff17_inv_sf <- st_as_sf(cabuff17_inv_pol)
 
 #sampling random points from this misshapen california shpfile
-sample17 <- st_sample(cabuff17_inv_sf, 669) %>% 
+sample17 <- st_sample(cabuff17_inv_sf, 3345) %>% 
   st_as_sf()
 
 #mappping to see what it looks like 
@@ -371,39 +357,36 @@ stack17 <- c(dem, aspect, ter_rug, pop17, lc16, road_dens, road_dist, streams_di
 
 #nonconflict points 
 zero_vars17 <- extract(stack17, zeros17_formatted, method = "simple", bind = TRUE, ID = TRUE) %>% 
-  as.data.frame() %>% 
-  mutate(ID = 0)
+  as.data.frame()
 
 #union conflict points before extracting 
-con_union17 <- con_17 %>% 
-  st_union() %>% 
-  vect()
+#con_union17 <- con_17 %>% 
+  #st_union() %>% 
+  #vect()
 
-con_vars17 <- extract(stack17, con_union17, method = "simple", bind = TRUE, ID = TRUE)
+con_vars17 <- extract(stack17, con_17, method = "simple", bind = TRUE, ID = TRUE) %>%
+  as.data.frame()
 
 #combine conflict and non-conflict
-model_df_17 <- rbind(zero_vars17, con_vars17)
+colnames(zero_vars17) <- c("ID", "dem", "aspect", "TRI", "popdens", "lc", "road_dens", "road_dist", "streams_dist", "urban_dist", "rec_dist", "forest_dist", "forest_dens")
 
-colnames(model_df_17) <- c("ID", "dem", "aspect", "TRI", "popdens1", "popdens2", "popdens3", "popdens4", "lc", "road_dens", "road_dist", "streams_dist", "urban_dist", "rec_dist", "forest_dist", "forest_dens")
+colnames(con_vars17) <- c("ID", "dem", "aspect", "TRI", "popdens", "lc", "road_dens", "road_dist", "streams_dist", "urban_dist", "rec_dist", "forest_dist", "forest_dens")
+
+model_df_17 <- rbind(zero_vars17, con_vars17)
 
 #run it in the model
 #model17 <- rspf(ID ~ dem + aspect + TRI + popdens1 + popdens2 + popdens3 + popdens4 + lc + road_dens + road_dist + streams_dist + urban_dist + rec_dist + forest_dist + forest_dens, family = "binomial", m = 0, B = 1000, data = model_df_16)
 
 #label the year for later binding with other dfs
 modeldf_17_year <- model_df_17 %>% 
-  mutate(year = 2017) %>% 
-  as.data.frame()
+  mutate(year = 2017) 
 
 ```
 
 ```{r}
 #save the file
 
-save(modeldf_17_year, file = here(gdrive_data, "/AnalysisData/model_df_noclimate/12_1_2022/modeldf_17.csv"))
-
-#EDIT: that save didn't work, trying this workaround
-
-write.csv(modeldf_17_year, file = here(gdrive_data, "/AnalysisData/model_df_noclimate/11_1_2022/modeldf_17.csv"), row.names = FALSE)
+write.csv(modeldf_17_year, file = here(gdrive_data, "/AnalysisData/model_df_noclimate/12_2_2022/modeldf_17.csv"), row.names = FALSE)
 
 ```
 
@@ -459,7 +442,7 @@ cabuff18_inv_sf <- st_as_sf(cabuff18_inv_pol)
 
 
 #sampling random points from this misshapen california shpfile
-sample18 <- st_sample(cabuff18_inv_sf, 727) %>% 
+sample18 <- st_sample(cabuff18_inv_sf, 3635) %>% 
   st_as_sf()
 
 #mappping to see what it looks like 
@@ -515,21 +498,23 @@ stack18 <- c(dem, aspect, ter_rug, pop18, lc16, road_dens, road_dist, streams_di
 
 #nonconflict points
 zero_vars18 <- extract(stack18, zeros18_formatted, method = "simple", bind = TRUE, ID = TRUE) %>% 
-  as.data.frame() %>%
-  mutate(ID = 0)
+  as.data.frame()
 
 #union conflict points before extracting
-con_union18 <- con_18 %>% 
-  st_union() %>% 
-  vect()
+#con_union18 <- con_18 %>% 
+  #st_union() %>% 
+  #vect()
 
-con_vars18 <- extract(stack18, con_union18, method = "simple", bind = TRUE, ID = TRUE)
+con_vars18 <- extract(stack18, con_18, method = "simple", bind = TRUE, ID = TRUE)%>%
+  as.data.frame()
 
 #combine conflict and non-conflict
 
-model_df_18 <- rbind(zero_vars18, con_vars18)
+colnames(zero_vars18) <- c("ID", "dem", "aspect", "TRI", "popdens", "lc", "road_dens", "road_dist", "streams_dist", "urban_dist", "rec_dist", "forest_dist", "forest_dens")
 
-colnames(model_df_18) <- c("ID", "dem", "aspect", "TRI", "popdens1", "popdens2", "popdens3", "popdens4", "lc", "road_dens", "road_dist", "streams_dist", "urban_dist", "rec_dist", "forest_dist", "forest_dens")
+colnames(con_vars18) <- c("ID", "dem", "aspect", "TRI", "popdens", "lc", "road_dens", "road_dist", "streams_dist", "urban_dist", "rec_dist", "forest_dist", "forest_dens")
+
+model_df_18 <- rbind(zero_vars18, con_vars18)
 
 #run it in the model
 
@@ -543,11 +528,11 @@ modeldf_18_year <- model_df_18 %>%
 ```{r}
 #save the file
 
-save(modeldf_18_year, file = here(gdrive_data, "/AnalysisData/model_df_noclimate/12_1_2022/modeldf_18.csv"))
+#save(modeldf_18_year, file = here(gdrive_data, "/AnalysisData/model_df_noclimate/12_1_2022/modeldf_18.csv"))
 
 #EDIT: that save didn't work, trying this workaround
 
-write.csv(modeldf_18_year, file = here(gdrive_data, "/AnalysisData/model_df_noclimate/11_1_2022/modeldf_18.csv"), row.names = FALSE)
+write.csv(modeldf_18_year, file = here(gdrive_data, "/AnalysisData/model_df_noclimate/12_2_2022/modeldf_18.csv"), row.names = FALSE)
 ```
 
 ##2019
@@ -601,7 +586,7 @@ cabuff19_inv_pol <- as.polygons(conbuff19_inverse)
 cabuff19_inv_sf <- st_as_sf(cabuff19_inv_pol)
 
 #sampling random points from this misshapen california shpfile
-sample19 <- st_sample(cabuff19_inv_sf, 609) %>% 
+sample19 <- st_sample(cabuff19_inv_sf, 3045) %>% 
   st_as_sf()
 
 #mappping to see what it looks like 
@@ -657,21 +642,23 @@ stack19 <- c(dem, aspect, ter_rug, pop19, lc19, road_dens, road_dist, streams_di
 
 #nonconflict points
 zero_vars19 <- extract(stack19, zeros19_formatted, method = "simple", bind = TRUE, ID = TRUE) %>% 
-  as.data.frame() %>% 
-  mutate(ID = 0)
+  as.data.frame()
 
-#union conflict points before extracting
-con_union19 <- con_19 %>% 
-  st_union() %>% 
-  vect()
+#union conflict points before extracting- likely not using this anymore as of 11/12/2021
+#con_union19 <- con_19 %>% 
+  #st_union() %>% 
+  #vect()
 
-con_var19 <- extract(stack19, con_union19, method = "simple", bind = TRUE, ID = TRUE)
+con_vars19 <- extract(stack19, con_19, method = "simple", bind = TRUE, ID = TRUE) %>%
+  as.data.frame()
 
 #combine conflict and non-conflict
 
-model_df_19 <- rbind(zero_vars19, con_var19)
+colnames(zero_vars19) <- c("ID", "dem", "aspect", "TRI", "popdens", "lc", "road_dens", "road_dist", "streams_dist", "urban_dist", "rec_dist", "forest_dist", "forest_dens")
 
-colnames(model_df_19) <- c("ID", "dem", "aspect", "TRI", "popdens1", "popdens2", "popdens3", "popdens4", "lc", "road_dens", "road_dist", "streams_dist", "urban_dist", "rec_dist", "forest_dist", "forest_dens")
+colnames(con_vars19) <- c("ID", "dem", "aspect", "TRI", "popdens", "lc", "road_dens", "road_dist", "streams_dist", "urban_dist", "rec_dist", "forest_dist", "forest_dens")
+
+model_df_19 <- rbind(zero_vars19, con_vars19)
 
 #label the year for later binding with other dfs
 modeldf_19_year <- model_df_19 %>% 
@@ -681,11 +668,7 @@ modeldf_19_year <- model_df_19 %>%
 ```{r}
 #save the file
 
-save(modeldf_19_year, file = here(gdrive_data, "/AnalysisData/model_df_noclimate/10_31_2022/modeldf_19.csv"))
-
-#EDIT: that save didn't work, trying this workaround
-
-write.csv(modeldf_19_year, file = here(gdrive_data, "/AnalysisData/model_df_noclimate/11_1_2022/modeldf_19.csv"), row.names = FALSE)
+write.csv(modeldf_19_year, file = here(gdrive_data, "/AnalysisData/model_df_noclimate/12_2_2022/modeldf_19.csv"), row.names = FALSE)
 
 ```
 
@@ -742,7 +725,7 @@ cabuff20_inv_sf <- st_as_sf(cabuff20_inv_pol)
 
 #sampling random points from this misshapen california shpfile
 
-sample20 <- st_sample(cabuff20_inv_sf, 799) %>% 
+sample20 <- st_sample(cabuff20_inv_sf, 3995) %>% 
   st_as_sf()
 
 #mappping to see what it looks like 
@@ -795,20 +778,27 @@ stack20 <- c(dem, aspect, ter_rug, pop20, lc19, road_dens, road_dist, streams_di
 
 #nonconflict points
 zero_vars20 <- extract(stack20, zeros20_formatted, method = "simple", bind = TRUE, ID = TRUE) %>%
-  as.data.frame() %>% 
-  mutate(ID = 0)
+  as.data.frame() 
 
-#union conflict points before extracting
-con_union20 <- con_20 %>% 
-  st_union() %>% 
-  vect()
-con_vars20 <- extract(stack20, con_union20, method = "simple", bind = TRUE, ID = TRUE)
+#union conflict points before extracting likely not using anymore 
+#con_union20 <- con_20 %>% 
+  #st_union() %>% 
+ # vect()
+
+con_vars20 <- extract(stack20, con_20, method = "simple", bind = TRUE, ID = TRUE) %>%
+  as.data.frame()
 
 #combine conflict and non-conflict
 
+colnames(zero_vars20) <- c("ID", "dem", "aspect", "TRI", "popdens", "lc", "road_dens", "road_dist", "streams_dist", "urban_dist", "rec_dist", "forest_dist", "forest_dens")
+
+
+colnames(con_vars20) <- c("ID", "dem", "aspect", "TRI", "popdens", "lc", "road_dens", "road_dist", "streams_dist", "urban_dist", "rec_dist", "forest_dist", "forest_dens")
+
+
 model_df_20 <- rbind(zero_vars20, con_vars20)
 
-colnames(model_df_20) <- c("ID", "dem", "aspect", "TRI", "popdens1", "popdens2", "popdens3", "popdens4", "lc", "road_dens", "road_dist", "streams_dist", "urban_dist", "rec_dist", "forest_dist", "forest_dens")
+
 
 #run it in the model
 #model20 <- rspf(ID ~ dem + aspect + TRI + popdens1 + popdens2 + popdens3 + popdens4 + lc + road_dens + road_dist + streams_dist + urban_dist + rec_dist + forest_dist + forest_dens, family = "binomial", m = 0, B = 1000, data = model_df_20)
@@ -821,11 +811,7 @@ modeldf_20_year <- model_df_20 %>%
 ```{r}
 #save the file
 
-save(modeldf_20_year, file = here(gdrive_data, "/AnalysisData/model_df_noclimate/12_1_2022/modeldf_20.csv"))
-
-#EDIT: that save didn't work, trying this workaround
-
-write.csv(modeldf_20_year, file = here(gdrive_data, "/AnalysisData/model_df_noclimate/11_1_2022/modeldf_20.csv"), row.names = FALSE)
+write.csv(modeldf_20_year, file = here(gdrive_data, "/AnalysisData/model_df_noclimate/12_2_2022/modeldf_20.csv"), row.names = FALSE)
 ```
 
 ##2021
@@ -880,7 +866,7 @@ cabuff21_inv_pol <- as.polygons(conbuff21_inverse)
 cabuff21_inv_sf <- st_as_sf(cabuff21_inv_pol)
 
 #sampling random points from this misshapen california shpfile
-sample21 <- st_sample(cabuff21_inv_sf, 1364) %>% 
+sample21 <- st_sample(cabuff21_inv_sf, 6820) %>% 
   st_as_sf()
 
 #mappping to see what it looks like 
@@ -936,21 +922,23 @@ stack21 <- c(dem, aspect, ter_rug, pop21, lc19, road_dens, road_dist, streams_di
 
 #nonconflict points
 zero_vars21 <- extract(stack21, zeros21_formatted, method = "simple", bind = TRUE, ID = TRUE) %>% 
-  as.data.frame() %>% 
-  mutate(ID = 0)
+  as.data.frame() 
 
 #union conflict points before extracting
-con_union21 <- con_21 %>% 
-  st_union() %>% 
-  vect()
+#con_union21 <- con_21 %>% 
+ # st_union() %>% 
+ # vect()
 
-con_vars21 <- extract(stack21, con_union21, method = "simple", bind = TRUE, ID = TRUE)
+con_vars21 <- extract(stack21, con_21, method = "simple", bind = TRUE, ID = TRUE) %>%
+  as.data.frame()
 
 #combine conflict and non-conflict
 
-model_df_21 <- rbind(zero_vars21, con_vars21)
+colnames(zero_vars21) <- c("ID", "dem", "aspect", "TRI", "popdens", "lc", "road_dens", "road_dist", "streams_dist", "urban_dist", "rec_dist", "forest_dist", "forest_dens")
 
-colnames(model_df_21) <- c("ID", "dem", "aspect", "TRI", "popdens1", "popdens2", "popdens3", "popdens4", "lc", "road_dens", "road_dist", "streams_dist", "urban_dist", "rec_dist", "forest_dist", "forest_dens")
+colnames(con_vars21) <- c("ID", "dem", "aspect", "TRI", "popdens", "lc", "road_dens", "road_dist", "streams_dist", "urban_dist", "rec_dist", "forest_dist", "forest_dens")
+
+model_df_21 <- rbind(zero_vars21, con_vars21)
 
 #label the year for later binding with other dfs
 modeldf_21_year <- model_df_21 %>% 
@@ -960,178 +948,38 @@ modeldf_21_year <- model_df_21 %>%
 ```{r}
 #saving the file
 
-save(modeldf_21_year, file = here(gdrive_data, "/AnalysisData/model_df_noclimate/10_31_2022/modeldf_21.csv"))
 
-#EDIT: that save didn't work, trying this workaround
-
-write.csv(modeldf_21_year, file = here(gdrive_data, "/AnalysisData/model_df_noclimate/11_1_2022/modeldf_21.csv"), row.names = FALSE)
+write.csv(modeldf_21_year, file = here(gdrive_data, "/AnalysisData/model_df_noclimate/12_2_2022/modeldf_21.csv"), row.names = FALSE)
 ```
 
-##2022
-
-```{r}
-#extract values for 2022, select only conflict indicator and geometry, and dissolve polygons
-
-con_22 <- conflict_points %>% 
-  separate(incdnt_d, into = c("inc_date", "inc_time"), sep = " ") %>% 
-  separate(inc_date, into = c("month", "day", "year"), sep = "/") %>% 
-  mutate(year = as.character.Date(year),
-         "type" = cnfrmd_,
-         "county" = cnty_nm,
-         "conflict" = 1) %>% 
-  select(conflict, wir_id:year, type, county, geometry) %>% 
-  filter(year == 2022) %>% 
-  select(conflict, geometry)
-
-con_22_buff <- conflict_buffers %>% 
-  filter(year == 2022) %>% 
-  select(conflict, geometry)
-
-#create a spatvector for processing in terra
-
-conpoints_22_sv <- vect(con_22)
-
-conbuff_22_sv <- vect(con_22_buff)
-
-#read in the CA raster
-ca_raster <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/CARaster_Tiger_Formatted/formattedcaraster.tif"))
-
-#make sure conflict is in the same projection
-conpoints22_reproj <- project(conpoints_22_sv,crs(ca_raster))
-
-conbuff22_reproj <- project(conbuff_22_sv,crs(ca_raster))
-
-conpoints22_sf <- st_as_sf(conpoints22_reproj)
-
-conbuff22_sf <- st_as_sf(conbuff22_reproj)
-
-#create an inverse mask- Anything withing the conflict buffer shapefiles will be a 0 value. So we get a California raster with all the conflict buffer locations zeroed out
-
-conbuff22_inverse <- mask(ca_raster, conbuff22_reproj, inverse = TRUE)
-
-tm_shape(conbuff22_inverse) +
-  tm_raster() +
-  tmap_mode("view")
-
-#making the inverse raster a shapefile 
-cabuff22_inv_pol <- as.polygons(conbuff22_inverse)
-
-cabuff22_inv_sf <- st_as_sf(cabuff22_inv_pol)
-
-#sampling random points from this misshapen california shpfile
-sample22 <- st_sample(cabuff22_inv_sf, 68) %>% 
-  st_as_sf()
-
-#mappping to see what it looks like 
-tm_shape(sample22) +
-  tm_dots() +
-  tmap_mode("view")
-
-#buffer the sample points - getting rid of this part for the sake of the model
-
-#sample16_buff <- st_buffer(sample16, dist = 5000) %>% 
-#  st_as_sf()
-
-#Testing to make sure the buffer worked
-# tm_shape(sample16) +
-#    tm_dots(col  = "blue") +
-# tm_shape(con_buff16_sf)+
-#    tm_polygons(col  = "red") +
-#    tmap_mode("view")
-
- 
-#removing non-conflict points that overlap
- 
-#intersect16 <- st_join(sample16, conbuff16_sf, join = st_intersects, left = FALSE)
-
-#plot intersection
-
-# tm_shape(intersect) +
-#   tm_polygons() +
-#   tmap_mode("view")
-
-#remove the intersecting polygons
-
-zeros22 <- ms_erase(target = sample22, erase = conbuff22_sf)
- 
- #plot to check that there is no overlap
- 
- tm_shape(conbuff22_sf) +
-   tm_polygons(col = "blue") +
-  tm_shape(zeros22) +
-   tm_dots() +
-  tmap_mode("view")
-
-zeros22_formatted <- zeros22 %>% 
-  mutate(conflict = 0) %>% 
-  select(conflict, geometry) %>% 
-  vect()
-
-#create a raster stack of all variables
-
-stack22 <- c(dem, aspect, ter_rug, pop21, lc19, road_dens, road_dist, streams_dist, urban_dist_19, rec_dist, fc_dist_19, fdens)
-
-#extract data points from these rasters and add them to the shapefile dataframe
-
-#nonconflict points
-zero_vars22 <- extract(stack22, zeros22_formatted, method = "simple", bind = TRUE, ID = TRUE) %>% 
-  mutate(ID = 0)
-
-#union conflict points before extracting
-con_union22 <- con_22 %>% 
-  st_union() %>% 
-  vect()
-
-con_vars22 <- extract(stack22, con_union22, method = "simple", bind = TRUE, ID = TRUE)
-
-#combine conflict and non-conflict
-
-model_df_22 <- rbind(zero_vars22, con_vars22)
-
-colnames(model_df_22) <- c("ID", "dem", "aspect", "TRI", "popdens1", "popdens2", "popdens3", "popdens4", "lc", "road_dens", "road_dist", "streams_dist", "urban_dist", "rec_dist", "forest_dist", "forest_dens")
-
-#label the year for later binding with other dfs
-modeldf_22_year <- model_df_22 %>% 
-  mutate(year = 2022)
-```
-
-```{r}
-#saving the file
-
-save(modeldf_22_year, file = here(gdrive_data, "/AnalysisData/model_df_noclimate/12_1_2022/modeldf_22.csv"))
-
-#EDIT: that save didn't work, trying this workaround
-
-write.csv(modeldf_22_year, file = here(gdrive_data, "/AnalysisData/model_df_noclimate/11_1_2022/modeldf_22.csv"), row.names = FALSE)
-```
 
 #Combine the yearly dataframes
 
 ```{r}
 #read them in
 
-df16 <- read_csv(here(gdrive_data, "/AnalysisData/model_df_noclimate/11_1_2022/modeldf_16.csv"))
+df16 <- read_csv(here(gdrive_data, "/AnalysisData/model_df_noclimate/12_2_2022/modeldf_16.csv"))
 
-df17 <- read_csv(here(gdrive_data, "/AnalysisData/model_df_noclimate/11_1_2022/modeldf_17.csv"))
+df17 <- read_csv(here(gdrive_data, "/AnalysisData/model_df_noclimate/12_2_2022/modeldf_17.csv"))
 
-df18 <- read_csv(here(gdrive_data, "/AnalysisData/model_df_noclimate/11_1_2022/modeldf_18.csv"))
+df18 <- read_csv(here(gdrive_data, "/AnalysisData/model_df_noclimate/12_2_2022/modeldf_18.csv"))
 
-df19 <- read_csv(here(gdrive_data, "/AnalysisData/model_df_noclimate/11_1_2022/modeldf_19.csv"))
+df19 <- read_csv(here(gdrive_data, "/AnalysisData/model_df_noclimate/12_2_2022/modeldf_19.csv"))
 
-df20 <- read_csv(here(gdrive_data, "/AnalysisData/model_df_noclimate/11_1_2022/modeldf_20.csv"))
+df20 <- read_csv(here(gdrive_data, "/AnalysisData/model_df_noclimate/12_2_2022/modeldf_20.csv"))
 
-df21 <- read_csv(here(gdrive_data, "/AnalysisData/model_df_noclimate/11_1_2022/modeldf_21.csv"))
+df21 <- read_csv(here(gdrive_data, "/AnalysisData/model_df_noclimate/12_2_2022/modeldf_21.csv"))
 
-df22 <- read_csv(here(gdrive_data, "/AnalysisData/model_df_noclimate/11_1_2022/modeldf_22.csv"))
 
-model_data_allyears <- rbind(df16, df17, df18, df19, df20, df21, df22)
+
+model_data_allyears <- rbind(df16, df17, df18, df19, df20, df21)
 
 ```
 
 ```{r}
 #save the all year data frame
 
-write.csv(model_data_allyears, file = here(gdrive_data, "/AnalysisData/model_df_noclimate/11_1_2022/model_data_allyears.csv"), row.names = FALSE)
+write.csv(model_data_allyears, file = here(gdrive_data, "/AnalysisData/model_df_noclimate/12_2_2022/model_data_allyears.csv"), row.names = FALSE)
 ```
 
 
@@ -1139,11 +987,149 @@ write.csv(model_data_allyears, file = here(gdrive_data, "/AnalysisData/model_df_
 
 ```{r}
 #read in the data
-model_data <- read_csv(here(gdrive_data, "/AnalysisData/model_df_noclimate/11_1_2022/model_data_allyears.csv"))
+model_data <- read_csv(here(gdrive_data, "/AnalysisData/model_df_noclimate/12_2_2022/model_data_allyears.csv"))
+```
+
+
+# load in rdata
+
+
+```{r}
+basemodel_allyears <- rspf(ID ~ dem + aspect + TRI + popdens + lc + road_dens + road_dist + streams_dist + urban_dist + rec_dist + forest_dist + forest_dens, family = "binomial", m = 0, B = 1000, data = model_data)
 ```
 
 
 ```{r}
-basemodel_allyears <- rspf(ID ~ dem + aspect + TRI + popdens1 + popdens2 + popdens3 + popdens4 + lc + road_dens + road_dist + streams_dist + urban_dist + rec_dist + forest_dist + forest_dens, family = "binomial", m = 0, B = 1000, data = model_data)
+#save the model
+
+save(basemodel_allyears, file = here(gdrive_data, "/AnalysisData/models/12_2_2022/model_allyears_noclimate/basemodel_allyears.rds"))
+
+#save the model
+
+save(basemodel_allyears, file = here("models", "basemodel_allyears.rds"))
+
+
+
+```
+
+#Set up 5 alternative models, with the same covariates as the Hagani et al models
+
+```{r}
+
+
+#Model 1: elevation + land cover + distance to forests + population density + distance to recreational areas+ road density + distance to urban areas
+mod1 <- rspf(ID ~ dem + lc + forest_dist + popdens + rec_dist + road_dens + urban_dist, family = "binomial", m = 0, B = 1000, data = model_data)
+
+
+#mod1
+save(mod1, file = here(gdrive_data, "/AnalysisData/models/12_2_2022/model_allyears_noclimate/mod1.rds"))
+
+#save the model
+
+save(mod1, file = here("models", "mod1.rds"))
+
+
+#Model 2: elevation + forest density + land cover + distance to forests + population density + distance to recreational areas + road density + distance to urban areas
+
+mod2 <- rspf(ID ~ dem + forest_dens + lc + forest_dist + popdens + rec_dist + road_dens + urban_dist, family = "binomial", m = 0, B = 1000, data = model_data)
+#mod2
+save(mod2, file = here(gdrive_data, "/AnalysisData/models/12_2_2022/model_allyears_noclimate/mod2.rds"))
+
+#save the model
+
+save(mod2, file = here("models", "mod2.rds"))
+
+
+#Model 3: elevation + land cover + distance to forests + population density + distance to recreational areas + distance to streams + terrain ruggedness + distance to urban areas
+
+mod3 <- rspf(ID ~ dem + lc + forest_dist + popdens + rec_dist + streams_dist + TRI + urban_dist, family = "binomial", m = 0, B = 1000, data = model_data)
+
+#mod3
+save(mod3, file = here(gdrive_data, "/AnalysisData/models/12_2_2022/model_allyears_noclimate/mod3.rds"))
+#save the model
+
+save(mod3, file = here("models", "mod3.rds"))
+
+
+#Model 4: elevation + forest density + land cover + distance to forests + population density + distance to recreational areas + distance to streams + distance to urban areas
+
+mod4 <- rspf(ID ~ dem + forest_dens + lc + forest_dist + popdens + rec_dist + streams_dist + urban_dist, family = "binomial", m = 0, B = 1000, data = model_data)
+#save the model
+save(mod4, file = here(gdrive_data, "/AnalysisData/models/12_2_2022/model_allyears_noclimate/mod4.rds"))
+
+#save the model
+
+save(mod4, file = here("models", "mod4.rds"))
+
+#Model 5: elevation + land cover + distance to forests + population density + distance to streams + terrain ruggedness + distance to urban areas
+
+mod5 <- rspf(ID ~ dem + lc + forest_dist + popdens + streams_dist + TRI + urban_dist, family = "binomial", m = 0, B = 1000, data = model_data)
+
+#save the model
+save(mod5, file = here(gdrive_data, "/AnalysisData/models/12_2_2022/model_allyears_noclimate/mod5.rds"))
+
+#save the model
+
+save(mod5, file = here("models", "mod5.rds"))
+
+```
+#save the 5 models 
+```{r}
+#mod1
+save(mod1, file = here(gdrive_data, "/AnalysisData/models/12_2_2022/model_allyears_noclimate/mod1.rds"))
+
+#save the model
+
+save(mod1, file = here("models", "mod1.rds"))
+
+#mod2
+save(mod2, file = here(gdrive_data, "/AnalysisData/models/12_2_2022/model_allyears_noclimate/mod2.rds"))
+
+#save the model
+
+save(mod2, file = here("models", "mod2.rds"))
+
+#mod3
+save(mod3, file = here(gdrive_data, "/AnalysisData/models/12_2_2022/model_allyears_noclimate/mod3.rds"))
+
+#save the model
+
+save(mod3, file = here("models", "mod3.rds"))
+
+#mod4
+
+save(mod4, file = here(gdrive_data, "/AnalysisData/models/12_2_2022/model_allyears_noclimate/mod4.rds"))
+
+#save the model
+
+save(mod4, file = here("models", "mod4.rds"))
+
+#mod5
+save(mod5, file = here(gdrive_data, "/AnalysisData/models/12_2_2022/model_allyears_noclimate/mod5.rds"))
+
+#save the model
+
+save(mod5, file = here("models", "mod5.rds"))
+
+```
+
+
+```{r}
+#comparing AIC scores
+AIC(mod1)
+
+AIC(mod2)
+
+AIC(mod3)
+
+AIC(mod4)
+
+AIC(mod5)
+
+
+model <- load(here("models", "basemodel_allyears.rds")) #you have to name the object "model or it will not read in right
+
+AIC(basemodel_allyears)
+
 ```
 
