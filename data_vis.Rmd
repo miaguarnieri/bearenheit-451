@@ -140,9 +140,11 @@ plot(map, main="Base Model Predictions")
 
 #read in model, then layers and stack them 
 ```{r}
-#read in the model
+#read in the models
 
 model<- load(here("models", "fire_model_allyears.rds")) #you have to name the object "model or it will not read in right
+
+model <- load(here("models", "mod3fire.rds"))
 
 # dem + aspect + TRI + popdens + lc + road_dens + road_dist + 
    # streams_dist + urban_dist + rec_dist + forest_dist + forest_dens + 
@@ -206,7 +208,7 @@ dist_fire_45yrs <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Fi
 
 stackca_clim_rast <- c(dem, aspect, TRI, popdens, lc, road_dens, road_dist, streams_dist, urban_dist, rec_dist, forest_dist, forest_dens, dist_fire_1yr, dist_fire_23yrs, dist_fire_45yrs)
 
-climate_model_data <- read_csv(here(gdrive_data, "/AnalysisData/model_df_climate/11_10_2022/climate_model_data_allyears.csv"))
+fire_model_data <- read_csv(here(gdrive_data, "/AnalysisData/model_df_climate/12_3_2022/fire_model_data_allyears.csv"))
 
 ```
 
@@ -220,7 +222,7 @@ names(stackca_clim_rast) <- c("dem", "aspect", "TRI", "popdens", "lc", "road_den
 #any categorical variables used need to be identified first
 
 #making land cover categories factors
-lc_factors <- as.factor(climate_model_data$lc)
+lc_factors <- as.factor(fire_model_data$lc)
 
 #turning that into a list
 f <- as.list(levels(lc_factors))
@@ -232,11 +234,11 @@ names(f) <- "lc"
 
 names(f_lc) <- "lc"
 
-map <- terra::predict(object = stackca_clim_rast, model = fire_model_allyears, fun = predict, factors = f_lc, na.rm = TRUE, type = "response")
+map <- terra::predict(object = stackca_clim_rast, model = mod3fire, fun = predict, factors = f_lc, na.rm = TRUE, type = "response")
 
 plot(map, main="Model Predictions")
 
-#writeRaster(map, filename = here(gdrive_data, "/AnalysisData/model_outputs/firemod_map.tif"), filetype = "GTiff", overwrite= TRUE)
+writeRaster(map, filename = here(gdrive_data, "/AnalysisData/model_outputs/mod3fire_map.tif"), filetype = "GTiff", overwrite= TRUE)
 
 ```
 
