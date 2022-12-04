@@ -16,7 +16,7 @@ library(sf)
 library(ResourceSelection)
 library(tidyterra)
 library(ggplot2)
-
+#library(calecopal)
 
 #file path
 gdrive_data <- "/Volumes/GoogleDrive/Shared drives/Black_Bear_Aware/gdrive_data"
@@ -26,9 +26,24 @@ gdrive_data <- "/Volumes/GoogleDrive/Shared drives/Black_Bear_Aware/gdrive_data"
 #Conflict data
 
 ```{r}
-conflict_points <- read_sf(here(gdrive_data, "/IntermediateData/IntermediateData_Files/conflict_formatted/conflict_points/conflict_points.shp"))
+conflict_points <- read_sf(here(gdrive_data, "/IntermediateData/IntermediateData_Files/conflict_formatted/conflict_points/conflict_points.shp")) %>% 
+  separate(incdnt_d, into = c("inc_date", "inc_time"), sep = " ") %>% 
+  separate(inc_date, into = c("month", "day", "year"), sep = "/") %>% 
+  mutate(year = as.character.Date(year),
+         "type" = cnfrmd_,
+         "county" = cnty_nm,
+         "conflict" = 1) %>% 
+  filter(year != "2022")
 
-
+ggplot(conflict_points) +
+  geom_bar(aes(x = year, fill = cnfrmd_)) +
+  scale_fill_manual(values = c("#B4AA98", "#516238", "#4CA2B0", "#395B5F")) +
+  labs(title = "Conflict Type By Year",
+       x = "Count",
+       y = "Year",
+       fill = "Conflict Type")
+#bigsur = c("#E4DECE", "#ECBD95", "#9BB1BB", "#79ACBD", "#346575", "#0B4221")
+#sierra2 = c("#FDD989", "#8BAD57", "#516238", "#4CA2B0", "#5A8B92", "#395B5F")
 ```
 
 

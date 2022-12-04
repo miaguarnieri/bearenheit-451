@@ -1113,9 +1113,24 @@ save(mod5, file = here("models", "mod5.rds"))
 
 ```
 
+#comparing AIC scores
 
 ```{r}
-#comparing AIC scores
+#read in the models
+model <- load(here("models", "basemodel_allyears.rds"))
+
+model <- load(here("models", "mod1.rds"))
+
+model <- load(here("models", "mod2.rds"))
+
+model <- load(here("models", "mod3.rds"))
+
+model <- load(here("models", "mod4.rds"))
+
+model <- load(here("models", "mod5.rds"))
+
+AIC(basemodel_allyears)
+
 AIC(mod1)
 
 AIC(mod2)
@@ -1126,10 +1141,6 @@ AIC(mod4)
 
 AIC(mod5)
 
-
-model <- load(here("models", "basemodel_allyears.rds")) #you have to name the object "model or it will not read in right
-
-AIC(basemodel_allyears)
 
 ```
 
