@@ -15,12 +15,22 @@ library(here)
 library(sf)
 library(ResourceSelection)
 library(tidyterra)
+library(ggplot2)
 
 
 #file path
 gdrive_data <- "/Volumes/GoogleDrive/Shared drives/Black_Bear_Aware/gdrive_data"
 
 ```
+
+#Conflict data
+
+```{r}
+conflict_points <- read_sf(here(gdrive_data, "/IntermediateData/IntermediateData_Files/conflict_formatted/conflict_points/conflict_points.shp"))
+
+
+```
+
 
 #Base Model - not up to date
 
